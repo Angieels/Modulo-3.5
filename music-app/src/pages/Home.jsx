@@ -1,15 +1,15 @@
-import { Play } from 'lucide-react'
-import { tracks } from '../data/tracks'
-import { usePlayer } from '../store/usePlayer'
+import {Play} from 'lucide-react'
+import {tracks} from '../data/tracks.jsx'
+import {usePlayer} from '../store/usePlayer.js'
 
 export default function Home() {
   const play = usePlayer((s) => s.play)
   const hero = tracks[0]
-
+ 
   return (
     <div className="space-y-10">
       <h1 className="text-3xl font-black md:text-4xl">Suena hoy</h1>
-
+ 
       <button onClick={() => play(tracks, 0)}
         className="puffy relative flex h-56 w-full items-end overflow-hidden rounded-[2.5rem] p-6 text-left transition active:scale-[.98] md:h-72"
         style={{ background: hero.cover }}>
@@ -21,7 +21,7 @@ export default function Home() {
           <Play fill="currentColor" />
         </span>
       </button>
-
+ 
       <section>
         <h2 className="mb-4 text-xl font-extrabold">Hits de la semana</h2>
         <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-4 md:mx-0 md:px-0">
@@ -35,7 +35,7 @@ export default function Home() {
           ))}
         </div>
       </section>
-
+ 
       <section>
         <h2 className="mb-4 text-xl font-extrabold">Lo más escuchado</h2>
         <div className="grid gap-3 md:grid-cols-2">
