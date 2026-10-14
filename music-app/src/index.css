@@ -1,27 +1,162 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap");
 @import "tailwindcss";
 
+/* =========================================================
+   TAILWIND THEME
+   Conservamos estos colores para componentes antiguos
+   que todavía usan bg-ink, bg-surface, text-cream, etc.
+   ========================================================= */
+
 @theme {
-  --font-sans: 'Nunito', system-ui, sans-serif;
-  --color-ink: #141210;      /* fondo: negro cálido */
-  --color-surface: #221f1b;  /* tarjetas y barras */
-  --color-cream: #f1e7d3;    /* texto y botones */
-  --color-sand: #bfae8e;     /* detalles */
+  --font-sans: "Nunito", system-ui, sans-serif;
+
+  --color-ink: #141210;
+  --color-surface: #221f1b;
+  --color-cream: #f1e7d3;
+  --color-sand: #bfae8e;
 }
 
-body { background: var(--color-ink); }
+/* =========================================================
+   VARIABLES GLOBALES DE BEATBOARD
+   El ThemeContext actualiza estas variables al cambiar tema.
+   ========================================================= */
+
+:root {
+  color-scheme: dark;
+
+  /* Plum Latte: tema predeterminado */
+  --bb-page: #171321;
+  --bb-card: #241d2b;
+  --bb-soft: #342937;
+  --bb-text: #f0d8e5;
+  --bb-muted: #c19fad;
+  --bb-accent: #f0d8e5;
+  --bb-primary: #4b3f4b;
+  --bb-border: #4b3f4b;
+  --bb-input: #201a29;
+  --bb-button-text: #f0d8e5;
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  background-color: var(--bb-page);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bb-page);
+  color: var(--bb-text);
+  font-family: var(--font-sans);
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+/* Herencia de fuente para los controles */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Los controles no deben desbordarse del diseño */
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+/* =========================================================
+   EFECTO PUFFY
+   ========================================================= */
 
 .puffy {
   box-shadow:
-    inset 0 2px 0 rgb(255 240 210 / .16),
-    inset 0 -8px 14px rgb(0 0 0 / .3),
-    0 14px 30px -10px rgb(0 0 0 / .75);
+    inset 0 2px 0 rgb(255 240 210 / 16%),
+    inset 0 -8px 14px rgb(0 0 0 / 30%),
+    0 14px 30px -10px rgb(0 0 0 / 75%);
 }
 
-/* El disco gira; con animation-play-state se pausa sin saltar */
-@keyframes spin-slow { to { transform: rotate(360deg); } }
-.vinyl-spin { animation: spin-slow 5s linear infinite; }
+/* =========================================================
+   VINILO GIRATORIO
+   ========================================================= */
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vinyl-spin {
+  animation: spin-slow 5s linear infinite;
+}
+
+/* =========================================================
+   SELECCIÓN DE TEXTO
+   ========================================================= */
+
+::selection {
+  background: var(--bb-primary);
+  color: var(--bb-button-text);
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+* {
+  scrollbar-color: var(--bb-primary) var(--bb-page);
+}
+
+/* =========================================================
+   CAMPOS DE FORMULARIO
+   ========================================================= */
+
+input,
+textarea,
+select {
+  accent-color: var(--bb-accent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--bb-muted);
+  opacity: 0.7;
+}
+
+/* =========================================================
+   TRANSICIONES DE TEMA
+   ========================================================= */
+
+body,
+#root {
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+/* =========================================================
+   ACCESIBILIDAD: REDUCIR MOVIMIENTO
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
