@@ -24,7 +24,7 @@ import Albums from "./pages/artist/Albums";
 import Events from "./pages/artist/Events";
 import Finances from "./pages/artist/Finances";
 import Reviews from "./pages/artist/Reviews";
-import ArtistProfile from "./pages/artist/Artistprofile";
+import ArtistProfile from "./pages/artist/Artistprofile.jsx";
 
 const Soon = ({ name }) => (
   <h1 className="text-3xl font-black">{name}</h1>
