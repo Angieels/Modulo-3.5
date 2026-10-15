@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import {
   Music2,
@@ -19,18 +18,15 @@ import LikeButton from "../components/LikeButton";
    UTILIDADES
 ========================================= */
 
-// Obtiene la URL pública de un archivo en Supabase Storage.
+// Obtiene la URL pública de un archivo de Supabase Storage.
 function getPublicUrl(bucket, path) {
   if (!path) return null;
 
-  // Si ya es una URL completa, se utiliza directamente.
   if (/^https?:\/\//i.test(path)) {
     return path;
   }
 
-  const { data } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(path);
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
 
   return data?.publicUrl ?? null;
 }
@@ -66,7 +62,10 @@ function normalizeTrack(track) {
     ? track.artist[0]
     : track.artist;
 
-  const audioUrl = getPublicUrl("tracks", track.audio_path);
+  // Todos los archivos MP3 se obtienen del bucket "audio".
+  const audioUrl = getPublicUrl("audio", track.audio_path);
+
+  // Las portadas siguen obteniéndose del bucket "covers".
   const coverUrl = getPublicUrl("covers", track.cover_path);
 
   return {
@@ -79,9 +78,32 @@ function normalizeTrack(track) {
     coverUrl,
     cover: coverUrl
       ? `url("${coverUrl}") center / cover no-repeat`
-      : "linear-gradient(135deg, #60432E, #292019, #17120F)",
+      : "linear-gradient(135deg, var(--bb-primary), var(--bb-card), var(--bb-page))",
   };
 }
+
+/* =========================================
+   ESTILOS DINÁMICOS
+========================================= */
+
+const cardStyle = {
+  backgroundColor: "var(--bb-card)",
+  borderColor: "var(--bb-border)",
+  color: "var(--bb-text)",
+};
+
+const softStyle = {
+  backgroundColor: "var(--bb-soft)",
+  borderColor: "var(--bb-border)",
+};
+
+const mutedTextStyle = {
+  color: "var(--bb-muted)",
+};
+
+const accentTextStyle = {
+  color: "var(--bb-accent)",
+};
 
 /* =========================================
    PÁGINA PRINCIPAL
@@ -141,13 +163,8 @@ export default function Home() {
           setError("No pudimos cargar algunas canciones.");
         }
 
-        setRecentTracks(
-          (recentResult.data ?? []).map(normalizeTrack)
-        );
-
-        setPopularTracks(
-          (popularResult.data ?? []).map(normalizeTrack)
-        );
+        setRecentTracks((recentResult.data ?? []).map(normalizeTrack));
+        setPopularTracks((popularResult.data ?? []).map(normalizeTrack));
       } catch (err) {
         console.error("Error inesperado al cargar canciones:", err);
 
@@ -168,7 +185,7 @@ export default function Home() {
     };
   }, []);
 
-  // Reproduce la canción y conserva la cola de reproducción.
+  // Reproduce la canción y conserva la cola.
   function handlePlay(track, queue) {
     if (!track.src) {
       setError(`No encontramos el audio de "${track.title}".`);
@@ -177,21 +194,30 @@ export default function Home() {
 
     setError("");
 
-    const index = queue.findIndex(
-      (item) => item.id === track.id
-    );
+    const index = queue.findIndex((item) => item.id === track.id);
 
     play(queue, Math.max(index, 0));
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#17120F] pb-32 text-[#F4E9D8]">
+    <main
+      className="min-h-screen overflow-hidden pb-32 transition-colors duration-300"
+      style={{
+        backgroundColor: "var(--bb-page)",
+        color: "var(--bb-text)",
+      }}
+    >
       <div className="mx-auto w-full max-w-[1600px] px-4 pt-5 sm:px-7 sm:pt-8 lg:px-10 xl:px-14">
-
         {/* CABECERA */}
         <header className="mb-9 flex items-center justify-between sm:mb-12">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D6B58B] text-[#17120F] shadow-lg shadow-black/10">
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg shadow-black/10"
+              style={{
+                backgroundColor: "var(--bb-accent)",
+                color: "var(--bb-page)",
+              }}
+            >
               <Music2 size={25} strokeWidth={2.5} />
             </div>
 
@@ -200,14 +226,22 @@ export default function Home() {
                 BeatBoard
               </h1>
 
-              <p className="mt-0.5 text-[10px] font-semibold tracking-[0.2em] text-[#BBA68E]">
+              <p
+                className="mt-0.5 text-[10px] font-semibold tracking-[0.2em]"
+                style={mutedTextStyle}
+              >
                 YOUR MUSIC SPACE
               </p>
             </div>
           </div>
 
           <div
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#493326] bg-[#292019] text-[#D6B58B]"
+            className="flex h-11 w-11 items-center justify-center rounded-full border"
+            style={{
+              backgroundColor: "var(--bb-card)",
+              borderColor: "var(--bb-border)",
+              color: "var(--bb-accent)",
+            }}
             aria-label="Música"
           >
             <Headphones size={20} />
@@ -218,7 +252,11 @@ export default function Home() {
         {error && (
           <p
             role="status"
-            className="mb-6 rounded-2xl border border-[#6A4B36] bg-[#292019] px-4 py-3 text-sm text-[#D6B58B]"
+            className="mb-6 rounded-2xl border px-4 py-3 text-sm"
+            style={{
+              ...cardStyle,
+              color: "var(--bb-accent)",
+            }}
           >
             {error}
           </p>
@@ -229,21 +267,18 @@ export default function Home() {
           <div className="flex min-h-72 flex-col items-center justify-center text-center">
             <Music2
               size={34}
-              className="mb-4 animate-pulse text-[#D6B58B]"
+              className="mb-4 animate-pulse"
+              style={accentTextStyle}
             />
 
-            <p className="font-semibold">
-              Preparando tu música...
-            </p>
+            <p className="font-semibold">Preparando tu música...</p>
 
-            <p className="mt-2 text-sm text-[#BBA68E]">
+            <p className="mt-2 text-sm" style={mutedTextStyle}>
               Un momentito.
             </p>
           </div>
         ) : (
           <div className="space-y-12 sm:space-y-16">
-
-            {/* LANZAMIENTOS RECIENTES */}
             <MusicSection
               title="Hoy suena"
               subtitle="Descubre lo último que llegó a BeatBoard."
@@ -254,7 +289,6 @@ export default function Home() {
               emptyMessage="Todavía no hay canciones nuevas."
             />
 
-            {/* CANCIONES POPULARES */}
             <MusicSection
               title="Populares"
               subtitle="Los temas que están sonando más."
@@ -264,12 +298,17 @@ export default function Home() {
               layout="grid"
               emptyMessage="Aún no hay canciones populares."
             />
-
           </div>
         )}
 
         {/* PIE DE PÁGINA */}
-        <footer className="mt-14 flex items-center justify-center gap-2 border-t border-[#493326]/60 pt-6 text-xs text-[#8F7964]">
+        <footer
+          className="mt-14 flex items-center justify-center gap-2 border-t pt-6 text-xs"
+          style={{
+            borderColor: "var(--bb-border)",
+            color: "var(--bb-muted)",
+          }}
+        >
           <Coffee size={15} />
           Hecho para escuchar sin prisa.
         </footer>
@@ -295,53 +334,60 @@ function MusicSection({
     <section className="min-w-0">
       <div className="mb-5 flex items-end justify-between gap-3 sm:mb-6">
         <div className="min-w-0">
-          <div className="mb-2.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#D6B58B] sm:text-xs">
+          <div
+            className="mb-2.5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] sm:text-xs"
+            style={accentTextStyle}
+          >
             {icon === "popular" ? (
               <Flame size={16} />
             ) : (
               <Sparkles size={16} />
             )}
 
-            {icon === "popular"
-              ? "Lo más escuchado"
-              : "Recién agregadas"}
+            {icon === "popular" ? "Lo más escuchado" : "Recién agregadas"}
           </div>
 
           <h2 className="text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl">
             {title}
           </h2>
 
-          <p className="mt-1.5 text-sm leading-relaxed text-[#BBA68E] sm:text-base">
+          <p
+            className="mt-1.5 text-sm leading-relaxed sm:text-base"
+            style={mutedTextStyle}
+          >
             {subtitle}
           </p>
         </div>
 
-        <span className="shrink-0 rounded-full border border-[#493326] bg-[#292019] px-3 py-2 text-[11px] text-[#D6B58B] sm:px-4 sm:text-xs">
-          {tracks.length}{" "}
-          {tracks.length === 1 ? "canción" : "canciones"}
+        <span
+          className="shrink-0 rounded-full border px-3 py-2 text-[11px] sm:px-4 sm:text-xs"
+          style={{
+            ...cardStyle,
+            color: "var(--bb-accent)",
+          }}
+        >
+          {tracks.length} {tracks.length === 1 ? "canción" : "canciones"}
         </span>
       </div>
 
       {tracks.length > 0 ? (
         layout === "grid" ? (
-          <PopularGrid
-            tracks={tracks}
-            onPlay={onPlay}
-          />
+          <PopularGrid tracks={tracks} onPlay={onPlay} />
         ) : (
-          <TrackCarousel
-            tracks={tracks}
-            onPlay={onPlay}
-          />
+          <TrackCarousel tracks={tracks} onPlay={onPlay} />
         )
       ) : (
-        <div className="flex min-h-44 flex-col items-center justify-center rounded-3xl border border-[#493326] bg-[#211A15] px-5 text-center">
+        <div
+          className="flex min-h-44 flex-col items-center justify-center rounded-3xl border px-5 text-center"
+          style={cardStyle}
+        >
           <Disc3
             size={32}
-            className="mb-3 text-[#D6B58B]"
+            className="mb-3"
+            style={accentTextStyle}
           />
 
-          <p className="text-sm text-[#BBA68E]">
+          <p className="text-sm" style={mutedTextStyle}>
             {emptyMessage}
           </p>
         </div>
@@ -360,26 +406,20 @@ function TrackCarousel({ tracks, onPlay }) {
 
   function updateActiveIndex() {
     const container = carouselRef.current;
-
     if (!container) return;
 
     const cards = Array.from(container.children);
-
     if (!cards.length) return;
 
     const center =
-      container.getBoundingClientRect().left +
-      container.clientWidth / 2;
+      container.getBoundingClientRect().left + container.clientWidth / 2;
 
     let closestIndex = 0;
     let closestDistance = Infinity;
 
     cards.forEach((card, index) => {
       const rect = card.getBoundingClientRect();
-
-      const distance = Math.abs(
-        center - (rect.left + rect.width / 2)
-      );
+      const distance = Math.abs(center - (rect.left + rect.width / 2));
 
       if (distance < closestDistance) {
         closestDistance = distance;
@@ -392,17 +432,12 @@ function TrackCarousel({ tracks, onPlay }) {
 
   function goTo(index) {
     const container = carouselRef.current;
-
     if (!container) return;
 
     const cards = Array.from(container.children);
-
     if (!cards.length) return;
 
-    const safeIndex = Math.max(
-      0,
-      Math.min(index, cards.length - 1)
-    );
+    const safeIndex = Math.max(0, Math.min(index, cards.length - 1));
 
     cards[safeIndex].scrollIntoView({
       behavior: "smooth",
@@ -415,7 +450,6 @@ function TrackCarousel({ tracks, onPlay }) {
 
   useEffect(() => {
     const container = carouselRef.current;
-
     if (!container) return;
 
     updateActiveIndex();
@@ -433,12 +467,14 @@ function TrackCarousel({ tracks, onPlay }) {
   }, [tracks.length]);
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#493326] bg-[#211A15] py-4 sm:py-5 lg:py-6">
-
+    <div
+      className="overflow-hidden rounded-3xl border py-4 transition-colors duration-300 sm:py-5 lg:py-6"
+      style={cardStyle}
+    >
       {/* NAVEGACIÓN */}
       <div className="mb-4 flex items-center justify-between px-4 sm:px-6">
-        <p className="text-xs text-[#BBA68E]">
-          <span className="font-bold text-[#F4E9D8]">
+        <p className="text-xs" style={mutedTextStyle}>
+          <span className="font-bold" style={{ color: "var(--bb-text)" }}>
             {String(activeIndex + 1).padStart(2, "0")}
           </span>
           {" / "}
@@ -451,7 +487,11 @@ function TrackCarousel({ tracks, onPlay }) {
             aria-label="Desplazar a la canción anterior"
             disabled={activeIndex === 0}
             onClick={() => goTo(activeIndex - 1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#5B4030] bg-[#30241B] text-[#D6B58B] transition hover:bg-[#493326] disabled:opacity-30"
+            className="flex h-9 w-9 items-center justify-center rounded-full border transition hover:brightness-110 disabled:opacity-30"
+            style={{
+              ...softStyle,
+              color: "var(--bb-accent)",
+            }}
           >
             <ChevronLeft size={19} />
           </button>
@@ -461,7 +501,11 @@ function TrackCarousel({ tracks, onPlay }) {
             aria-label="Desplazar a la siguiente canción"
             disabled={activeIndex >= tracks.length - 1}
             onClick={() => goTo(activeIndex + 1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#5B4030] bg-[#30241B] text-[#D6B58B] transition hover:bg-[#493326] disabled:opacity-30"
+            className="flex h-9 w-9 items-center justify-center rounded-full border transition hover:brightness-110 disabled:opacity-30"
+            style={{
+              ...softStyle,
+              color: "var(--bb-accent)",
+            }}
           >
             <ChevronRight size={19} />
           </button>
@@ -502,14 +546,24 @@ function TrackCarousel({ tracks, onPlay }) {
                 setActiveIndex(index);
                 onPlay(track, tracks);
               }}
-              className={`group w-[min(66vw,220px)] flex-none snap-center cursor-pointer overflow-hidden rounded-2xl border text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B58B] sm:w-[220px] lg:w-[240px] xl:w-[250px] ${
-                active
-                  ? "border-[#8B6748] bg-[#493326]"
-                  : "border-[#493326]/70 bg-[#2A211A] hover:border-[#8B6748] hover:bg-[#35271E]"
+              className={`group w-[min(66vw,220px)] flex-none snap-center cursor-pointer overflow-hidden rounded-2xl border text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 sm:w-[220px] lg:w-[240px] xl:w-[250px] ${
+                active ? "shadow-md" : "hover:brightness-110"
               }`}
+              style={{
+                backgroundColor: active ? "var(--bb-primary)" : "var(--bb-soft)",
+                borderColor: active ? "var(--bb-accent)" : "var(--bb-border)",
+                color: "var(--bb-text)",
+                "--tw-ring-color": "var(--bb-accent)",
+              }}
             >
               {/* PORTADA */}
-              <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-[#60432E] via-[#39281E] to-[#17120F]">
+              <div
+                className="relative aspect-square overflow-hidden"
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--bb-primary), var(--bb-card), var(--bb-page))",
+                }}
+              >
                 {track.coverUrl ? (
                   <img
                     src={track.coverUrl}
@@ -526,16 +580,26 @@ function TrackCarousel({ tracks, onPlay }) {
                     <Music2
                       size={44}
                       strokeWidth={1.4}
-                      className="text-[#D6B58B]"
+                      style={accentTextStyle}
                     />
                   </div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#17120F]/70 via-transparent to-transparent" />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to top, color-mix(in srgb, var(--bb-page) 80%, transparent), transparent 65%)",
+                  }}
+                />
 
                 {/* FAVORITOS */}
                 <div
-                  className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#17120F]/75 backdrop-blur-sm"
+                  className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--bb-page) 88%, transparent)",
+                  }}
                   onClick={(event) => event.stopPropagation()}
                   onKeyDown={(event) => event.stopPropagation()}
                   onKeyUp={(event) => event.stopPropagation()}
@@ -543,7 +607,14 @@ function TrackCarousel({ tracks, onPlay }) {
                   <LikeButton trackId={track.id} />
                 </div>
 
-                <span className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-[#17120F]/70 px-2.5 py-1.5 text-[9px] font-bold tracking-wider text-[#F4E9D8]">
+                <span
+                  className="absolute bottom-3 left-3 rounded-full border border-white/10 px-2.5 py-1.5 text-[9px] font-bold tracking-wider"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--bb-page) 85%, transparent)",
+                    color: "var(--bb-text)",
+                  }}
+                >
                   {index === 0 ? "NOVEDAD" : "BEATBOARD"}
                 </span>
               </div>
@@ -552,26 +623,32 @@ function TrackCarousel({ tracks, onPlay }) {
               <div className="p-3.5 sm:p-4">
                 <h3
                   title={track.title}
-                  className="truncate text-sm font-extrabold text-[#F4E9D8] sm:text-base"
+                  className="truncate text-sm font-extrabold sm:text-base"
+                  style={{ color: "var(--bb-text)" }}
                 >
                   {track.title || "Sin título"}
                 </h3>
 
                 <p
                   title={track.artistName}
-                  className="mt-1.5 truncate text-xs text-[#D6B58B] sm:text-sm"
+                  className="mt-1.5 truncate text-xs sm:text-sm"
+                  style={accentTextStyle}
                 >
                   {track.artistName}
                 </p>
 
-                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#BBA68E]">
+                <div
+                  className="mt-3 flex items-center gap-1.5 text-[11px]"
+                  style={mutedTextStyle}
+                >
                   <Headphones size={13} className="shrink-0" />
-                  <span>
-                    {formatCount(track.plays_count)} reproducciones
-                  </span>
+                  <span>{formatCount(track.plays_count)} reproducciones</span>
                 </div>
 
-                <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-[#D6B58B] transition-colors group-hover:text-[#F4E9D8]">
+                <p
+                  className="mt-3 text-[10px] font-bold uppercase tracking-wider transition-colors"
+                  style={accentTextStyle}
+                >
                   Toca para reproducir ↗
                 </p>
               </div>
@@ -589,11 +666,14 @@ function TrackCarousel({ tracks, onPlay }) {
               type="button"
               aria-label={`Desplazarse a ${track.title}`}
               onClick={() => goTo(index)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                index === activeIndex
-                  ? "w-6 bg-[#D6B58B]"
-                  : "w-1.5 bg-[#6A4B36]"
-              }`}
+              className="h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width: index === activeIndex ? "24px" : "6px",
+                backgroundColor:
+                  index === activeIndex
+                    ? "var(--bb-accent)"
+                    : "var(--bb-border)",
+              }}
             />
           ))}
         </div>
@@ -627,15 +707,28 @@ function PopularGrid({ tracks, onPlay }) {
             event.preventDefault();
             onPlay(track, tracks);
           }}
-          className="group flex min-w-0 cursor-pointer items-center gap-3 rounded-2xl border border-[#493326]/80 bg-[#211A15] p-3 transition duration-300 hover:border-[#8B6748] hover:bg-[#30241B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B58B] sm:gap-4 sm:rounded-3xl sm:p-4"
+          className="group flex min-w-0 cursor-pointer items-center gap-3 rounded-2xl border p-3 transition duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 sm:gap-4 sm:rounded-3xl sm:p-4"
+          style={{
+            ...cardStyle,
+            "--tw-ring-color": "var(--bb-accent)",
+          }}
         >
           {/* POSICIÓN */}
-          <span className="w-5 flex-none text-center text-xs font-bold tabular-nums text-[#8F7964] sm:w-7 sm:text-sm">
+          <span
+            className="w-5 flex-none text-center text-xs font-bold tabular-nums sm:w-7 sm:text-sm"
+            style={mutedTextStyle}
+          >
             {String(index + 1).padStart(2, "0")}
           </span>
 
           {/* PORTADA */}
-          <div className="relative h-[68px] w-[68px] flex-none overflow-hidden rounded-xl bg-gradient-to-br from-[#60432E] via-[#39281E] to-[#17120F] sm:h-[84px] sm:w-[84px] sm:rounded-2xl">
+          <div
+            className="relative h-[68px] w-[68px] flex-none overflow-hidden rounded-xl sm:h-[84px] sm:w-[84px] sm:rounded-2xl"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--bb-primary), var(--bb-card), var(--bb-page))",
+            }}
+          >
             {track.coverUrl ? (
               <img
                 src={track.coverUrl}
@@ -652,24 +745,26 @@ function PopularGrid({ tracks, onPlay }) {
                 <Music2
                   size={30}
                   strokeWidth={1.5}
-                  className="text-[#D6B58B]"
+                  style={accentTextStyle}
                 />
               </div>
             )}
           </div>
 
-          {/* TÍTULO, ARTISTA Y ESTADÍSTICAS */}
+          {/* INFORMACIÓN */}
           <div className="min-w-0 flex-1">
             <h3
               title={track.title}
-              className="truncate text-sm font-extrabold text-[#F4E9D8] sm:text-base"
+              className="truncate text-sm font-extrabold sm:text-base"
+              style={{ color: "var(--bb-text)" }}
             >
               {track.title || "Sin título"}
             </h3>
 
             <p
               title={track.artistName}
-              className="mt-1 truncate text-xs text-[#D6B58B] sm:text-sm"
+              className="mt-1 truncate text-xs sm:text-sm"
+              style={accentTextStyle}
             >
               {track.artistName}
             </p>
@@ -677,7 +772,11 @@ function PopularGrid({ tracks, onPlay }) {
             <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:mt-3 sm:gap-2">
               <span
                 title={`${Number(track.plays_count) || 0} reproducciones`}
-                className="inline-flex items-center gap-1 rounded-full border border-[#493326] bg-[#30241B] px-2 py-1 text-[10px] font-medium text-[#D6B58B] sm:text-xs"
+                className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium sm:text-xs"
+                style={{
+                  ...softStyle,
+                  color: "var(--bb-accent)",
+                }}
               >
                 <Headphones size={12} />
                 {formatCount(track.plays_count)}
@@ -685,7 +784,11 @@ function PopularGrid({ tracks, onPlay }) {
 
               <span
                 title={`${Number(track.likes_count) || 0} likes`}
-                className="inline-flex items-center gap-1 rounded-full border border-[#493326] bg-[#30241B] px-2 py-1 text-[10px] font-medium text-[#D6B58B] sm:text-xs"
+                className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium sm:text-xs"
+                style={{
+                  ...softStyle,
+                  color: "var(--bb-accent)",
+                }}
               >
                 <span aria-hidden="true">♥</span>
                 {formatCount(track.likes_count)}
@@ -693,9 +796,9 @@ function PopularGrid({ tracks, onPlay }) {
             </div>
           </div>
 
-          {/* FAVORITO: CLIC INDEPENDIENTE */}
+          {/* FAVORITO */}
           <div
-            className="flex h-9 w-9 flex-none items-center justify-center rounded-full transition hover:bg-[#493326] sm:h-10 sm:w-10"
+            className="flex h-9 w-9 flex-none items-center justify-center rounded-full transition hover:brightness-110 sm:h-10 sm:w-10"
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}
             onKeyUp={(event) => event.stopPropagation()}

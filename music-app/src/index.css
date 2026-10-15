@@ -160,3 +160,49 @@ body,
     transition-duration: 0.01ms !important;
   }
 }
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html,
+body {
+  background-color: var(--bb-page);
+  color: var(--bb-text);
+}
+
+body {
+  margin: 0;
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+#root {
+  background-color: var(--bb-page);
+  color: var(--bb-text);
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+input,
+textarea,
+select {
+  background-color: var(--bb-input);
+  color: var(--bb-text);
+  border-color: var(--bb-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--bb-muted);
+  opacity: 0.75;
+}
+
+::selection {
+  background-color: var(--bb-primary);
+  color: var(--bb-text);
+}
