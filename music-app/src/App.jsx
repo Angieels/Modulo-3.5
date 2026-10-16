@@ -10,6 +10,7 @@ import {
 import Layout from "./components/Layout";
 import Melody from "./components/Melody.jsx";
 import Home from "./pages/Home";
+import Search from "./pages/Search.jsx";
 import Profile from "./pages/Profile";
 import Library from "./pages/Library";
 import { supabase } from "./supabase";
@@ -24,16 +25,7 @@ import Albums from "./pages/artist/Albums";
 import Events from "./pages/artist/Events";
 import Finances from "./pages/artist/Finances";
 import Reviews from "./pages/artist/Reviews";
-<<<<<<< Updated upstream
 import ArtistProfile from "./pages/artist/Artistprofile.jsx";
-=======
-import ArtistProfile from "./pages/artist/Artistprofile.jsx";
-import Search from "./pages/Search.jsx"
->>>>>>> Stashed changes
-
-const Soon = ({ name }) => (
-  <h1 className="text-3xl font-black">{name}</h1>
-);
 
 export default function App() {
   useEffect(() => {
