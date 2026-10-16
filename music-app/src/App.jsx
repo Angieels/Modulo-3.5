@@ -24,7 +24,12 @@ import Albums from "./pages/artist/Albums";
 import Events from "./pages/artist/Events";
 import Finances from "./pages/artist/Finances";
 import Reviews from "./pages/artist/Reviews";
+<<<<<<< Updated upstream
 import ArtistProfile from "./pages/artist/Artistprofile.jsx";
+=======
+import ArtistProfile from "./pages/artist/Artistprofile.jsx";
+import Search from "./pages/Search.jsx"
+>>>>>>> Stashed changes
 
 const Soon = ({ name }) => (
   <h1 className="text-3xl font-black">{name}</h1>
@@ -54,10 +59,7 @@ export default function App() {
         {/* Páginas principales */}
         <Route element={<Layout />}>
           <Route index element={<Home />} />
-          <Route
-            path="buscar"
-            element={<Soon name="Buscar" />}
-          />
+          <Route path="/buscar" element={<Search />} />
           <Route path="biblioteca" element={<Library />} />
           <Route path="perfil" element={<Profile />} />
         </Route>
